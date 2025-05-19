@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --brk-blue: 255 0 67 0.267; /* #110043 */
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Melhorias para dispositivos móveis */
+  @media (max-width: 768px) {
+    html {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Aumenta a área de toque para todos os elementos interativos */
+    button,
+    [role="button"],
+    a,
+    label,
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 36px;
+      min-width: 36px;
+      touch-action: manipulation;
+    }
+
+    /* Aumenta o tamanho dos botões em formulários */
+    button.text-xs,
+    .btn-sm {
+      min-height: 36px !important;
+      padding: 0.5rem 0.75rem !important;
+      font-size: 0.75rem !important;
+    }
+
+    input,
+    select,
+    textarea {
+      font-size: 13px !important; /* Reduzido de 14px */
+      padding: 0.3rem 0.45rem !important; /* Reduzido */
+    }
+
+    /* Ajusta o tamanho do texto para melhor legibilidade */
+    .text-xs {
+      font-size: 0.6rem !important; /* Reduzido de 0.65rem */
+    }
+
+    .text-sm {
+      font-size: 0.7rem !important; /* Reduzido de 0.75rem */
+    }
+
+    .text-base {
+      font-size: 0.8rem !important; /* Reduzido de 0.875rem */
+    }
+
+    .text-lg {
+      font-size: 0.9rem !important; /* Reduzido de 1rem */
+    }
+
+    /* Melhora o espaçamento em dispositivos móveis */
+    .p-1 {
+      padding: 0.12rem !important; /* Reduzido */
+    }
+
+    .p-2 {
+      padding: 0.3rem !important; /* Reduzido */
+    }
+
+    .p-3 {
+      padding: 0.45rem !important; /* Reduzido */
+    }
+
+    .p-4 {
+      padding: 0.6rem !important; /* Reduzido */
+    }
+
+    .gap-1 {
+      gap: 0.12rem !important; /* Reduzido */
+    }
+
+    .gap-2 {
+      gap: 0.3rem !important; /* Reduzido */
+    }
+
+    .gap-3 {
+      gap: 0.45rem !important; /* Reduzido */
+    }
+
+    .gap-4 {
+      gap: 0.6rem !important; /* Reduzido */
+    }
+
+    /* Reduz margens */
+    .m-1 {
+      margin: 0.12rem !important; /* Reduzido */
+    }
+
+    .m-2 {
+      margin: 0.3rem !important; /* Reduzido */
+    }
+
+    .m-3 {
+      margin: 0.45rem !important; /* Reduzido */
+    }
+
+    .m-4 {
+      margin: 0.6rem !important; /* Reduzido */
+    }
+
+    .my-1,
+    .mt-1,
+    .mb-1 {
+      margin-top: 0.12rem !important; /* Reduzido */
+      margin-bottom: 0.12rem !important; /* Reduzido */
+    }
+
+    .my-2,
+    .mt-2,
+    .mb-2 {
+      margin-top: 0.3rem !important; /* Reduzido */
+      margin-bottom: 0.3rem !important; /* Reduzido */
+    }
+
+    .my-3,
+    .mt-3,
+    .mb-3 {
+      margin-top: 0.45rem !important; /* Reduzido */
+      margin-bottom: 0.45rem !important; /* Reduzido */
+    }
+
+    .my-4,
+    .mt-4,
+    .mb-4 {
+      margin-top: 0.6rem !important; /* Reduzido */
+      margin-bottom: 0.6rem !important; /* Reduzido */
+    }
+
+    /* Reduz o tamanho dos ícones */
+    svg {
+      height: 0.9em !important; /* Reduzido de 1em */
+      width: 0.9em !important; /* Reduzido de 1em */
+    }
+  }
+}
+
+@layer utilities {
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  .rotate-270 {
+    transform: rotate(270deg);
+  }
+
+  .bg-brk-blue {
+    background-color: #110043;
+  }
+
+  .text-brk-blue {
+    color: #110043;
+  }
+
+  .border-brk-blue {
+    border-color: #110043;
+  }
+
+  /* Animações suaves para transições */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Melhorias para feedback tátil */
+  .touch-feedback {
+    @apply active:opacity-70 active:scale-95 transition-all duration-150;
+  }
+
+  /* Melhorias para dispositivos móveis */
+  .mobile-section-header {
+    @apply bg-[#3D00FF]/10 p-3 flex justify-between items-center cursor-pointer rounded-t-lg;
+  }
+
+  .mobile-section-title {
+    @apply font-bold text-[#3D00FF];
+  }
+
+  .mobile-section-content {
+    @apply p-3 space-y-3;
+  }
+}
+
+@media print {
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+}
