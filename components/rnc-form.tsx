@@ -210,10 +210,8 @@ export const RncForm = () => {
       // Função para calcular altura de texto multi-linha
       const calcularAlturaTexto = (linhas: string[], alturaLinha: number): number => {
         return linhas.length * alturaLinha
-      }
-
-      // Função para adicionar cabeçalho corporativo em cada página
-      const addHeader = (pageNumber: number) => {
+      }      // Função para adicionar cabeçalho corporativo em cada página
+      const addHeader = (pageNumber: number, totalPages: number = 1) => {
         // Fundo do cabeçalho
         pdf.setFillColor(...corTerciaria)
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 40, "F")
@@ -275,7 +273,7 @@ export const RncForm = () => {
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(10)
         pdf.setTextColor(...corTextoSecundario)
-        const pageText = `Página ${pageNumber} de ${pdf.getNumberOfPages() || 1}`
+        const pageText = `Página ${pageNumber} de ${totalPages}`
         const pageWidth = (pdf.getStringUnitWidth(pageText) * 10) / pdf.internal.scaleFactor
         pdf.text(pageText, pdf.internal.pageSize.getWidth() - margemDireita - pageWidth, 35)
 
@@ -283,10 +281,8 @@ export const RncForm = () => {
         pdf.setDrawColor(...corSecundaria)
         pdf.setLineWidth(0.2)
         pdf.line(margemEsquerda, 40, pdf.internal.pageSize.getWidth() - margemDireita, 40)
-      }
-
-      // Função para adicionar rodapé corporativo
-      const addFooter = (pageNumber: number) => {
+      }      // Função para adicionar rodapé corporativo
+      const addFooter = (pageNumber: number, totalPages: number = 1) => {
         const footerY = pdf.internal.pageSize.getHeight() - 15
 
         // Linha separadora acima do rodapé
@@ -307,7 +303,7 @@ export const RncForm = () => {
         pdf.text("BRK - Registro de Não Conformidade", pdf.internal.pageSize.getWidth() / 2 - 25, footerY)
 
         // Número da página
-        const pageText = `Página ${pageNumber} de ${pdf.getNumberOfPages() || 1}`
+        const pageText = `Página ${pageNumber} de ${totalPages}`
         const pageWidth = (pdf.getStringUnitWidth(pageText) * 8) / pdf.internal.scaleFactor
         pdf.text(pageText, pdf.internal.pageSize.getWidth() - margemDireita - pageWidth, footerY)
       }
@@ -453,10 +449,8 @@ export const RncForm = () => {
           console.warn("Erro ao adicionar imagem ao PDF:", error)
           return false
         }
-      }
-
-      // Adiciona o cabeçalho na primeira página
-      addHeader(1)
+      }      // Adiciona o cabeçalho na primeira página
+      addHeader(1, 1)  // Temporariamente passa 1 como número total de páginas
 
       // Posição inicial após o cabeçalho
       let yPos = margemSuperior + 30
@@ -629,16 +623,17 @@ export const RncForm = () => {
         // Label
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(7)
-        pdf.setTextColor(...corTexto)
+        pdf.setTextColor(...corTexto);
         pdf.text(option.label, currentX + 5, yPos + 7)
 
         currentX += 25
       })
-
+      
       // Natureza (primeira linha)
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(8)
-      pdf.setTextColor(...corPrimaria)      pdf.text("Natureza:", margemEsquerda + 5, yPos + 17)
+      pdf.setTextColor(...corPrimaria);
+      pdf.text("Natureza:", margemEsquerda + 5, yPos + 17)
 
       currentX = margemEsquerda + 35
       const naturezaOptions = [
@@ -1241,13 +1236,11 @@ export const RncForm = () => {
           margemEsquerda + signatureColWidth * 2 + 10 - 10,
           yPos + 80,
         )
-      }
-
-      // Adiciona rodapé em todas as páginas
+      }      // Adiciona rodapé em todas as páginas
       const totalPages = pdf.getNumberOfPages()
       for (let i = 1; i <= totalPages; i++) {
         pdf.setPage(i)
-        addFooter(i)
+        addFooter(i, totalPages)
       }
 
       // Salva o PDF
