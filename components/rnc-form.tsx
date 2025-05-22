@@ -578,10 +578,12 @@ export const RncForm = () => {
             pdf.line(campo.x + labelWidth + 2, campo.y, campo.x + larguraUtil - 15, campo.y)
           } else {
             const lineWidth = campo.x < margemEsquerda + colWidth / 2 ? colWidth / 2 - 15 : colWidth - 15
-            pdf.line(campo.x + labelWidth + 2, campo.y, campo.x + lineWidth, campo.y)
+                        pdf.line(campo.x + labelWidth + 2, campo.y, campo.x + lineWidth, campo.y)
           }
         }
-      })      yPos += 65      // Classificação com estilo melhorado
+      });
+      
+      yPos += 65; // Classificação com estilo melhorado
       yPos = addSectionTitle("CLASSIFICAÇÃO", yPos)
       yPos += 5
       
@@ -618,9 +620,8 @@ export const RncForm = () => {
         { label: "SAA", value: "saa" },
         { label: "SES", value: "ses" },
       ]
-      
-      // Posicionamento dos checkboxes do TIPO
-      let currentX = margemEsquerda + 30;
+        // Posicionamento dos checkboxes do TIPO
+      let currentXTipo = margemEsquerda + 30;
       tipoOptions.forEach((option) => {
         const checkSize = 4;
         
@@ -628,28 +629,28 @@ export const RncForm = () => {
         if (formData.tipo.includes(option.value)) {
           // Checkbox marcado
           pdf.setFillColor(...corDestaque)
-          pdf.rect(currentX, yPos + 7, checkSize, checkSize, "F")
+          pdf.rect(currentXTipo, yPos + 7, checkSize, checkSize, "F")
           
           // Marca de verificação
           pdf.setDrawColor(...corBranco)
           pdf.setLineWidth(0.2)
-          pdf.line(currentX + 0.8, yPos + 8.5, currentX + 1.5, yPos + 9.5)
-          pdf.line(currentX + 1.5, yPos + 9.5, currentX + 3.2, yPos + 7.5)
+          pdf.line(currentXTipo + 0.8, yPos + 8.5, currentXTipo + 1.5, yPos + 9.5)
+          pdf.line(currentXTipo + 1.5, yPos + 9.5, currentXTipo + 3.2, yPos + 7.5)
         } else {
           // Checkbox vazio
           pdf.setDrawColor(...corPrimaria)
           pdf.setLineWidth(0.1)
           pdf.setFillColor(...corBranco)
-          pdf.rect(currentX, yPos + 7, checkSize, checkSize, "S")
+          pdf.rect(currentXTipo, yPos + 7, checkSize, checkSize, "S")
         }
         
         // Label
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(8)
         pdf.setTextColor(...corTexto)
-        pdf.text(option.label, currentX + 6, yPos + 10)
+        pdf.text(option.label, currentXTipo + 6, yPos + 10)
         
-        currentX += 40; // Espaçamento adequado
+        currentXTipo += 40; // Espaçamento adequado
       })
       
       // ------ SEÇÃO NATUREZA ------
