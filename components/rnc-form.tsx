@@ -581,14 +581,12 @@ export const RncForm = () => {
             pdf.line(campo.x + labelWidth + 2, campo.y, campo.x + lineWidth, campo.y)
           }
         }
-      })
-
-      yPos += 65      // Classificação com estilo melhorado
+      })      yPos += 65      // Classificação com estilo melhorado
       yPos = addSectionTitle("CLASSIFICAÇÃO", yPos)
       yPos += 5
       
       // Aumentar a altura da área de classificação para melhor organizar os itens
-      const alturaClassificacao = 65; // Aumentado para acomodar melhor as opções
+      const alturaClassificacao = 80; // Aumentado para acomodar melhor as opções
       
       // Desenha um retângulo de fundo para toda a área de classificação
       pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave
@@ -599,49 +597,68 @@ export const RncForm = () => {
       pdf.setLineWidth(0.1)
       pdf.rect(margemEsquerda, yPos, larguraUtil, alturaClassificacao, "S")
 
-      // Divisão da área de classificação em duas colunas principais
-      const colEsquerda = margemEsquerda + 5;
-      const colDireita = margemEsquerda + (larguraUtil/2) + 10;
+      // Divide a área de classificação em duas seções principais
+      const halfWidth = larguraUtil / 2;
       
-      // COLUNA ESQUERDA (TIPO E NATUREZA)
-      // Tipo - Com posicionamento melhorado
+      // Seção esquerda para TIPO e NATUREZA
+      // Adiciona um retângulo divisório sutil para separar as seções
+      pdf.setDrawColor(...corSecundaria)
+      pdf.setLineWidth(0.1)
+      pdf.line(margemEsquerda + halfWidth, yPos, margemEsquerda + halfWidth, yPos + alturaClassificacao)
+      
+      // ------ SEÇÃO TIPO ------
+      
+      // Cabeçalho da seção TIPO
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(9)
       pdf.setTextColor(...corPrimaria)
-      pdf.text("Tipo:", colEsquerda, yPos + 10)
-
+      pdf.text("Tipo:", margemEsquerda + 5, yPos + 10)
+      
       const tipoOptions = [
         { label: "SAA", value: "saa" },
         { label: "SES", value: "ses" },
       ]
-
-      // Posicionamento horizontal melhorado para Tipo
-      currentX = colEsquerda + 25
+      
+      // Posicionamento dos checkboxes do TIPO
+      let currentX = margemEsquerda + 30;
       tipoOptions.forEach((option) => {
-        // Checkbox com tamanho ligeiramente maior para melhor visibilidade
         const checkSize = 4;
+        
+        // Checkbox
         if (formData.tipo.includes(option.value)) {
+          // Checkbox marcado
           pdf.setFillColor(...corDestaque)
           pdf.rect(currentX, yPos + 7, checkSize, checkSize, "F")
+          
+          // Marca de verificação
+          pdf.setDrawColor(...corBranco)
+          pdf.setLineWidth(0.2)
+          pdf.line(currentX + 0.8, yPos + 8.5, currentX + 1.5, yPos + 9.5)
+          pdf.line(currentX + 1.5, yPos + 9.5, currentX + 3.2, yPos + 7.5)
         } else {
+          // Checkbox vazio
           pdf.setDrawColor(...corPrimaria)
           pdf.setLineWidth(0.1)
+          pdf.setFillColor(...corBranco)
           pdf.rect(currentX, yPos + 7, checkSize, checkSize, "S")
         }
-
-        // Label com fonte um pouco maior para melhor legibilidade
+        
+        // Label
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(8)
-        pdf.setTextColor(...corTexto);
+        pdf.setTextColor(...corTexto)
         pdf.text(option.label, currentX + 6, yPos + 10)
-
-        currentX += 35 // Maior espaçamento entre opções
+        
+        currentX += 40; // Espaçamento adequado
       })
-        // Natureza - Com grid layout melhorado
+      
+      // ------ SEÇÃO NATUREZA ------
+      
+      // Cabeçalho da seção NATUREZA
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(9)
-      pdf.setTextColor(...corPrimaria);
-      pdf.text("Natureza:", colEsquerda, yPos + 25)
+      pdf.setTextColor(...corPrimaria)
+      pdf.text("Natureza:", margemEsquerda + 5, yPos + 25)
       
       const naturezaOptions = [
         { label: "EXECUÇÃO", value: "execucao" },
@@ -653,67 +670,60 @@ export const RncForm = () => {
         { label: "M. AMBIENTE", value: "mAmbiente" },
         { label: "ORGANIZ/COMPORTAMENTO", value: "organizComportamento" },
       ]
+      // Layout em grade organizada para Natureza
+      // Dividir em 4 colunas x 2 linhas
+      const naturezaColCount = 4;
+      const naturezaRowCount = 2;
+      const naturezaColWidth = (halfWidth - 40) / naturezaColCount;
+      const naturezaRowHeight = 12;
+      const naturezaStartX = margemEsquerda + 30;
+      const naturezaStartY = yPos + 25;
       
-      // Grid layout para Natureza - Organizado em 2 linhas x 4 colunas
-      const naturezaColWidth = (larguraUtil/2 - 30) / 4; // 4 colunas na metade da largura
-      
-      // Primeira linha das opções de Natureza
-      for (let i = 0; i < 4; i++) {
-        if (i < naturezaOptions.length) {
-          const option = naturezaOptions[i];
-          const optionX = colEsquerda + 25 + (i * naturezaColWidth);
-          
-          // Checkbox com tamanho consistente
-          const checkSize = 4;
-          if (formData.natureza.includes(option.value)) {
-            pdf.setFillColor(...corDestaque)
-            pdf.rect(optionX, yPos + 22, checkSize, checkSize, "F")
-          } else {
-            pdf.setDrawColor(...corPrimaria)
-            pdf.setLineWidth(0.1)
-            pdf.rect(optionX, yPos + 22, checkSize, checkSize, "S")
+      for (let row = 0; row < naturezaRowCount; row++) {
+        for (let col = 0; col < naturezaColCount; col++) {
+          const index = row * naturezaColCount + col;
+          if (index < naturezaOptions.length) {
+            const option = naturezaOptions[index];
+            const optionX = naturezaStartX + (col * naturezaColWidth);
+            const optionY = naturezaStartY + (row * naturezaRowHeight);
+            
+            // Checkbox com tamanho consistente
+            const checkSize = 4;
+            if (formData.natureza.includes(option.value)) {
+              // Checkbox marcado
+              pdf.setFillColor(...corDestaque)
+              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "F")
+              
+              // Marca de verificação
+              pdf.setDrawColor(...corBranco)
+              pdf.setLineWidth(0.2)
+              pdf.line(optionX + 0.8, optionY - 1.5, optionX + 1.5, optionY - 0.5)
+              pdf.line(optionX + 1.5, optionY - 0.5, optionX + 3.2, optionY - 2.5)
+            } else {
+              // Checkbox vazio
+              pdf.setDrawColor(...corPrimaria)
+              pdf.setLineWidth(0.1)
+              pdf.setFillColor(...corBranco)
+              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "S")
+            }
+            
+            // Label
+            pdf.setFont("helvetica", "normal")
+            pdf.setFontSize(7) // Tamanho menor para caber
+            pdf.setTextColor(...corTexto)
+            pdf.text(option.label, optionX + 6, optionY)
           }
-          
-          // Label
-          pdf.setFont("helvetica", "normal")
-          pdf.setFontSize(8)
-          pdf.setTextColor(...corTexto)
-          pdf.text(option.label, optionX + 6, yPos + 25)
         }
       }
       
-      // Segunda linha das opções de Natureza
-      for (let i = 4; i < naturezaOptions.length; i++) {
-        const option = naturezaOptions[i];
-        const optionX = colEsquerda + 25 + ((i-4) * naturezaColWidth);
-        
-        // Checkbox
-        const checkSize = 4;
-        if (formData.natureza.includes(option.value)) {
-          pdf.setFillColor(...corDestaque)
-          pdf.rect(optionX, yPos + 32, checkSize, checkSize, "F")
-        } else {
-          pdf.setDrawColor(...corPrimaria)
-          pdf.setLineWidth(0.1)
-          pdf.rect(optionX, yPos + 32, checkSize, checkSize, "S")
-        }
-        
-        // Label
-        pdf.setFont("helvetica", "normal")
-        pdf.setFontSize(8)
-        pdf.setTextColor(...corTexto)
-        pdf.text(option.label, optionX + 6, yPos + 35)
-      }
-
-      // (Removido bloco duplicado de naturezaOptions e renderização duplicada das opções de natureza)
+      // ------ SEÇÃO OBRA ------
       
-      // Obra
+      // Cabeçalho da seção OBRA
       pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
+      pdf.setFontSize(9)
       pdf.setTextColor(...corPrimaria)
-      pdf.text("Obra:", margemEsquerda + 140, yPos + 7)
-
-      let obraX = margemEsquerda + 160
+      pdf.text("Obra:", margemEsquerda + halfWidth + 5, yPos + 10)
+      
       const obraOptions = [
         { label: "RCE", value: "rce" },
         { label: "RDA", value: "rda" },
@@ -729,138 +739,98 @@ export const RncForm = () => {
         { label: "BARRAGEM", value: "barragem" },
         { label: "PAVIMENTAÇÃO", value: "pavimentacao" },
       ]
-
-      // Primeira linha de obra
-      for (let i = 0; i < 3; i++) {
-        if (i < obraOptions.length) {
-          const option = obraOptions[i]
-          // Checkbox
-          if (formData.obra.includes(option.value)) {
-            pdf.setFillColor(...corDestaque)
-            pdf.rect(obraX, yPos + 4, 3, 3, "F")
-          } else {
-            pdf.setDrawColor(...corPrimaria)
-            pdf.setLineWidth(0.1)
-            pdf.rect(obraX, yPos + 4, 3, 3, "S")
+      
+      // Disposição em grade para obra - 4 colunas por 4 linhas
+      const obraColCount = 4;
+      const obraRowCount = 4;
+      const obraColWidth = (halfWidth - 20) / obraColCount;
+      const obraRowHeight = 10;
+      const obraStartX = margemEsquerda + halfWidth + 25;
+      const obraStartY = yPos + 10;
+      
+      for (let row = 0; row < obraRowCount; row++) {
+        for (let col = 0; col < obraColCount; col++) {
+          const index = row * obraColCount + col;
+          if (index < obraOptions.length) {
+            const option = obraOptions[index];
+            const optionX = obraStartX + (col * obraColWidth);
+            const optionY = obraStartY + (row * obraRowHeight);
+            
+            // Checkbox
+            const checkSize = 3;
+            if (formData.obra.includes(option.value)) {
+              // Checkbox marcado
+              pdf.setFillColor(...corDestaque)
+              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "F")
+              
+              // Marca de verificação
+              pdf.setDrawColor(...corBranco)
+              pdf.setLineWidth(0.2)
+              pdf.line(optionX + 0.6, optionY - 1.5, optionX + 1, optionY - 1)
+              pdf.line(optionX + 1, optionY - 1, optionX + 2.2, optionY - 2)
+            } else {
+              // Checkbox vazio
+              pdf.setDrawColor(...corPrimaria)
+              pdf.setLineWidth(0.1)
+              pdf.setFillColor(...corBranco)
+              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "S")
+            }
+            
+            // Label
+            pdf.setFont("helvetica", "normal")
+            pdf.setFontSize(6) // Tamanho menor para caber
+            pdf.setTextColor(...corTexto)
+            pdf.text(option.label, optionX + 5, optionY)
           }
-
-          // Label
-          pdf.setFont("helvetica", "normal")
-          pdf.setFontSize(7)
-          pdf.setTextColor(...corTexto)
-          pdf.text(option.label, obraX + 5, yPos + 7)
-
-          obraX += 40
         }
       }
       
-      // Segunda linha de obra
-      obraX = margemEsquerda + 160
-      for (let i = 3; i < 7; i++) {
-        if (i < obraOptions.length) {
-          const option = obraOptions[i]
-          // Checkbox
-          if (formData.obra.includes(option.value)) {
-            pdf.setFillColor(...corDestaque)
-            pdf.rect(obraX, yPos + 11, 3, 3, "F")
-          } else {
-            pdf.setDrawColor(...corPrimaria)
-            pdf.setLineWidth(0.1)
-            pdf.rect(obraX, yPos + 11, 3, 3, "S")
-          }
-
-          // Label
-          pdf.setFont("helvetica", "normal")
-          pdf.setFontSize(7)
-          pdf.setTextColor(...corTexto)
-          pdf.text(option.label, obraX + 5, yPos + 14)
-
-          obraX += 40
-        }
-      }
+      // ------ SEÇÃO GRAU ------
       
-      // Terceira linha de obra
-      obraX = margemEsquerda + 160
-      for (let i = 7; i < 11; i++) {
-        if (i < obraOptions.length) {
-          const option = obraOptions[i]
-          // Checkbox
-          if (formData.obra.includes(option.value)) {
-            pdf.setFillColor(...corDestaque)
-            pdf.rect(obraX, yPos + 18, 3, 3, "F")
-          } else {
-            pdf.setDrawColor(...corPrimaria)
-            pdf.setLineWidth(0.1)
-            pdf.rect(obraX, yPos + 18, 3, 3, "S")
-          }
-
-          // Label
-          pdf.setFont("helvetica", "normal")
-          pdf.setFontSize(7)
-          pdf.setTextColor(...corTexto)
-          pdf.text(option.label, obraX + 5, yPos + 21)
-
-          obraX += 40
-        }
-      }
-      
-      // Quarta linha de obra
-      obraX = margemEsquerda + 160
-      for (let i = 11; i < obraOptions.length; i++) {
-        if (i < obraOptions.length) {
-          const option = obraOptions[i]
-          // Checkbox
-          if (formData.obra.includes(option.value)) {
-            pdf.setFillColor(...corDestaque)
-            pdf.rect(obraX, yPos + 25, 3, 3, "F")
-          } else {
-            pdf.setDrawColor(...corPrimaria)
-            pdf.setLineWidth(0.1)
-            pdf.rect(obraX, yPos + 25, 3, 3, "S")
-          }
-
-          // Label
-          pdf.setFont("helvetica", "normal")
-          pdf.setFontSize(7)
-          pdf.setTextColor(...corTexto)
-          pdf.text(option.label, obraX + 5, yPos + 28)
-
-          obraX += 40
-        }
-      }
-
-      // Grau
+      // Cabeçalho da seção GRAU
       pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
+      pdf.setFontSize(9)
       pdf.setTextColor(...corPrimaria)
-      pdf.text("Grau:", margemEsquerda + 5, yPos + 27)
-
-      currentX = margemEsquerda + 25
+      pdf.text("Grau:", margemEsquerda + 5, yPos + 45)
+      
       const grauOptions = [
         { label: "LEVE", value: "leve" },
         { label: "MÉDIA", value: "media" },
         { label: "GRAVE", value: "grave" },
         { label: "GRAVÍSSIMA", value: "gravissima" },
       ]
-
+      
+      // Layout horizontal para opções de grau
+      let grauX = margemEsquerda + 30;
       grauOptions.forEach((option) => {
+        const checkSize = 4;
+        
         // Checkbox
         if (formData.grau === option.value) {
+          // Checkbox marcado
           pdf.setFillColor(...corDestaque)
-          pdf.rect(currentX, yPos + 24, 3, 3, "F")
+          pdf.rect(grauX, yPos + 42, checkSize, checkSize, "F")
+          
+          // Marca de verificação
+          pdf.setDrawColor(...corBranco)
+          pdf.setLineWidth(0.2)
+          pdf.line(grauX + 0.8, yPos + 43.5, grauX + 1.5, yPos + 44.5)
+          pdf.line(grauX + 1.5, yPos + 44.5, grauX + 3.2, yPos + 42.5)
         } else {
+          // Checkbox vazio
           pdf.setDrawColor(...corPrimaria)
           pdf.setLineWidth(0.1)
-          pdf.rect(currentX, yPos + 24, 3, 3, "S")
+          pdf.setFillColor(...corBranco)
+          pdf.rect(grauX, yPos + 42, checkSize, checkSize, "S")
         }
-
+        
         // Label
         pdf.setFont("helvetica", "normal")
-        pdf.setFontSize(7)
+        pdf.setFontSize(8)
         pdf.setTextColor(...corTexto)
-        pdf.text(option.label, currentX + 5, yPos + 27)
-
-        currentX += 35
+        pdf.text(option.label, grauX + 6, yPos + 45)
+        
+        grauX += 40; // Espaçamento adequado
       })
 
       yPos += 35
