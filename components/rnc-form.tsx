@@ -593,16 +593,14 @@ export const RncForm = () => {
 
       // Classificação com estilo compacto
       yPos = addSectionTitle("CLASSIFICAÇÃO", yPos)
-      yPos += 5
-
-      // Desenha um retângulo de fundo para toda a área de classificação
+      yPos += 5      // Desenha um retângulo de fundo para toda a área de classificação
       pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave
-      pdf.rect(margemEsquerda, yPos, larguraUtil, 30, "F")
+      pdf.rect(margemEsquerda, yPos, larguraUtil, 50, "F")
 
       // Adiciona uma borda sutil
       pdf.setDrawColor(...corSecundaria)
       pdf.setLineWidth(0.1)
-      pdf.rect(margemEsquerda, yPos, larguraUtil, 30, "S")
+      pdf.rect(margemEsquerda, yPos, larguraUtil, 50, "S")
 
       // Layout compacto para Tipo, Natureza e Grau
       // Tipo
@@ -640,8 +638,7 @@ export const RncForm = () => {
       // Natureza (primeira linha)
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(8)
-      pdf.setTextColor(...corPrimaria)
-      pdf.text("Natureza:", margemEsquerda + 5, yPos + 17)
+      pdf.setTextColor(...corPrimaria)      pdf.text("Natureza:", margemEsquerda + 5, yPos + 17)
 
       currentX = margemEsquerda + 35
       const naturezaOptions = [
@@ -651,10 +648,11 @@ export const RncForm = () => {
         { label: "PROJETO", value: "projeto" },
         { label: "OUTROS", value: "outros" },
         { label: "MATERIAL", value: "material" },
-      ]
-
-      // Primeira linha de natureza
-      for (let i = 0; i < 3; i++) {
+        { label: "INTERFERÊNCIA", value: "interferencia" },
+        { label: "M. AMBIENTE", value: "mAmbiente" },
+        { label: "ORGANIZ/COMPORTAMENTO", value: "organizComportamento" },
+      ]      // Primeira linha de natureza
+      for (let i = 0; i < 5; i++) {
         if (i < naturezaOptions.length) {
           const option = naturezaOptions[i]
           // Checkbox
@@ -674,6 +672,152 @@ export const RncForm = () => {
           pdf.text(option.label, currentX + 5, yPos + 17)
 
           currentX += 40
+        }
+      }
+      
+      // Segunda linha de natureza
+      currentX = margemEsquerda + 35
+      for (let i = 5; i < naturezaOptions.length; i++) {
+        if (i < naturezaOptions.length) {
+          const option = naturezaOptions[i]
+          // Checkbox
+          if (formData.natureza.includes(option.value)) {
+            pdf.setFillColor(...corDestaque)
+            pdf.rect(currentX, yPos + 21, 3, 3, "F")
+          } else {
+            pdf.setDrawColor(...corPrimaria)
+            pdf.setLineWidth(0.1)
+            pdf.rect(currentX, yPos + 21, 3, 3, "S")
+          }
+
+          // Label
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(7)
+          pdf.setTextColor(...corTexto)
+          pdf.text(option.label, currentX + 5, yPos + 24)
+
+          currentX += 70
+        }      }
+      
+      // Obra
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(8)
+      pdf.setTextColor(...corPrimaria)
+      pdf.text("Obra:", margemEsquerda + 140, yPos + 7)
+
+      let obraX = margemEsquerda + 160
+      const obraOptions = [
+        { label: "RCE", value: "rce" },
+        { label: "RDA", value: "rda" },
+        { label: "LIGAÇÕES", value: "ligacoes" },
+        { label: "ADUTORA", value: "adutora" },
+        { label: "OUTROS", value: "outro" },
+        { label: "COLETOR", value: "coletor" },
+        { label: "LR", value: "lr" },
+        { label: "EEE", value: "eee" },
+        { label: "RESERVATÓRIO", value: "reservatorio" },
+        { label: "ETE", value: "ete" },
+        { label: "ETA", value: "eta" },
+        { label: "BARRAGEM", value: "barragem" },
+        { label: "PAVIMENTAÇÃO", value: "pavimentacao" },
+      ]
+
+      // Primeira linha de obra
+      for (let i = 0; i < 3; i++) {
+        if (i < obraOptions.length) {
+          const option = obraOptions[i]
+          // Checkbox
+          if (formData.obra.includes(option.value)) {
+            pdf.setFillColor(...corDestaque)
+            pdf.rect(obraX, yPos + 4, 3, 3, "F")
+          } else {
+            pdf.setDrawColor(...corPrimaria)
+            pdf.setLineWidth(0.1)
+            pdf.rect(obraX, yPos + 4, 3, 3, "S")
+          }
+
+          // Label
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(7)
+          pdf.setTextColor(...corTexto)
+          pdf.text(option.label, obraX + 5, yPos + 7)
+
+          obraX += 40
+        }
+      }
+      
+      // Segunda linha de obra
+      obraX = margemEsquerda + 160
+      for (let i = 3; i < 7; i++) {
+        if (i < obraOptions.length) {
+          const option = obraOptions[i]
+          // Checkbox
+          if (formData.obra.includes(option.value)) {
+            pdf.setFillColor(...corDestaque)
+            pdf.rect(obraX, yPos + 11, 3, 3, "F")
+          } else {
+            pdf.setDrawColor(...corPrimaria)
+            pdf.setLineWidth(0.1)
+            pdf.rect(obraX, yPos + 11, 3, 3, "S")
+          }
+
+          // Label
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(7)
+          pdf.setTextColor(...corTexto)
+          pdf.text(option.label, obraX + 5, yPos + 14)
+
+          obraX += 40
+        }
+      }
+      
+      // Terceira linha de obra
+      obraX = margemEsquerda + 160
+      for (let i = 7; i < 11; i++) {
+        if (i < obraOptions.length) {
+          const option = obraOptions[i]
+          // Checkbox
+          if (formData.obra.includes(option.value)) {
+            pdf.setFillColor(...corDestaque)
+            pdf.rect(obraX, yPos + 18, 3, 3, "F")
+          } else {
+            pdf.setDrawColor(...corPrimaria)
+            pdf.setLineWidth(0.1)
+            pdf.rect(obraX, yPos + 18, 3, 3, "S")
+          }
+
+          // Label
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(7)
+          pdf.setTextColor(...corTexto)
+          pdf.text(option.label, obraX + 5, yPos + 21)
+
+          obraX += 40
+        }
+      }
+      
+      // Quarta linha de obra
+      obraX = margemEsquerda + 160
+      for (let i = 11; i < obraOptions.length; i++) {
+        if (i < obraOptions.length) {
+          const option = obraOptions[i]
+          // Checkbox
+          if (formData.obra.includes(option.value)) {
+            pdf.setFillColor(...corDestaque)
+            pdf.rect(obraX, yPos + 25, 3, 3, "F")
+          } else {
+            pdf.setDrawColor(...corPrimaria)
+            pdf.setLineWidth(0.1)
+            pdf.rect(obraX, yPos + 25, 3, 3, "S")
+          }
+
+          // Label
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(7)
+          pdf.setTextColor(...corTexto)
+          pdf.text(option.label, obraX + 5, yPos + 28)
+
+          obraX += 40
         }
       }
 
