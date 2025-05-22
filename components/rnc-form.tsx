@@ -158,7 +158,7 @@ export const RncForm = () => {
     setIsGeneratingPdf(true)
     toast({
       title: "Gerando PDF",
-      description: "Aguarde enquanto o PDF corporativo está sendo gerado...",
+      description: "Aguarde enquanto o PDF está sendo gerado...",
     })
 
     try {
@@ -244,7 +244,7 @@ export const RncForm = () => {
         }
 
         // Título do documento - centralizado e sem sobreposição
-        const titulo = "REGISTRO DE NÃO CONFORMIDADE"
+        const titulo = "          REGISTRO DE NÃO CONFORMIDADE"
         pdf.setFont("helvetica", "bold")
         pdf.setFontSize(16)
         pdf.setTextColor(...corPrimaria)
@@ -1110,7 +1110,7 @@ export const RncForm = () => {
       pdf.save(`${documentId}.pdf`)
 
       toast({
-        title: "PDF corporativo gerado com sucesso!",
+        title: "PDF gerado com sucesso!",
         description: "O download do arquivo foi iniciado.",
       })
     } catch (error) {
@@ -1153,7 +1153,7 @@ export const RncForm = () => {
           </Button>
           <Button onClick={gerarPDF} disabled={isGeneratingPdf} className="bg-[#3D00FF] hover:bg-[#3D00FF]/90">
             <FileText className="mr-2 h-4 w-4" />
-            {isGeneratingPdf ? "Gerando PDF..." : "Gerar PDF Corporativo"}
+            {isGeneratingPdf ? "Gerando PDF..." : "Gerar PDF"}
           </Button>
         </div>
       </div>
