@@ -70,32 +70,6 @@ export const AssinaturasSection = ({ updateFormData, formData, readOnly = false 
                 readOnly={readOnly}
               />
             </div>
-
-            <div className="space-y-2">
-              <SignaturePad
-                value={assinaturas.contratanteAbertura}
-                onChange={(value) => handleAssinaturaChange("contratanteAbertura", value)}
-                className={cn("h-32 md:h-36 w-full", isMobile && "h-24")}
-                disabled={readOnly}
-              />
-              <div className="text-center">
-                <div className="border-t border-gray-400 mx-auto w-4/5 mt-2"></div>
-                <Label className={cn("text-brk-blue font-bold", isMobile && "text-sm")}>CONTRATANTE</Label>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <SignaturePad
-                value={assinaturas.contratadaAbertura}
-                onChange={(value) => handleAssinaturaChange("contratadaAbertura", value)}
-                className={cn("h-32 md:h-36 w-full", isMobile && "h-24")}
-                disabled={readOnly}
-              />
-              <div className="text-center">
-                <div className="border-t border-gray-400 mx-auto w-4/5 mt-2"></div>
-                <Label className={cn("text-brk-blue font-bold", isMobile && "text-sm")}>CONTRATADA</Label>
-              </div>
-            </div>
           </div>
 
           {/* Coluna de Fechamento */}
@@ -112,32 +86,6 @@ export const AssinaturasSection = ({ updateFormData, formData, readOnly = false 
                 className="flex-1"
                 readOnly={readOnly}
               />
-            </div>
-
-            <div className="space-y-2">
-              <SignaturePad
-                value={assinaturas.contratanteFechamento}
-                onChange={(value) => handleAssinaturaChange("contratanteFechamento", value)}
-                className={cn("h-32 md:h-36 w-full", isMobile && "h-24")}
-                disabled={readOnly}
-              />
-              <div className="text-center">
-                <div className="border-t border-gray-400 mx-auto w-4/5 mt-2"></div>
-                <Label className={cn("text-brk-blue font-bold", isMobile && "text-sm")}>CONTRATANTE</Label>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <SignaturePad
-                value={assinaturas.contratadaFechamento}
-                onChange={(value) => handleAssinaturaChange("contratadaFechamento", value)}
-                className={cn("h-32 md:h-36 w-full", isMobile && "h-24")}
-                disabled={readOnly}
-              />
-              <div className="text-center">
-                <div className="border-t border-gray-400 mx-auto w-4/5 mt-2"></div>
-                <Label className={cn("text-brk-blue font-bold", isMobile && "text-sm")}>CONTRATADA</Label>
-              </div>
             </div>
           </div>
         </div>

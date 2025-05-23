@@ -173,16 +173,14 @@ export const RncForm = () => {
       })
 
       // ID do documento para referência
-      const documentId = gerarIdDocumento()
-
-      // Esquema de cores corporativo baseado no novo logo BRK
-      const corPrimaria = [61, 0, 255] // #3D00FF - Azul/roxo do logo BRK
-      const corSecundaria = [100, 116, 139] // #64748B - Cinza azulado para detalhes
-      const corTerciaria = [241, 245, 249] // #F1F5F9 - Cinza claro para fundos
-      const corTexto = [15, 23, 42] // #0F172A - Quase preto para texto principal
-      const corTextoSecundario = [71, 85, 105] // #475569 - Cinza para texto secundário
-      const corDestaque = [61, 0, 255] // #3D00FF - Mesma cor do logo para destaques
-      const corBranco = [255, 255, 255] // #FFFFFF - Branco
+      const documentId = gerarIdDocumento()      // Esquema de cores corporativo baseado no novo logo BRK
+      const corPrimaria = [61, 0, 255] as const // #3D00FF - Azul/roxo do logo BRK
+      const corSecundaria = [100, 116, 139] as const // #64748B - Cinza azulado para detalhes
+      const corTerciaria = [241, 245, 249] as const // #F1F5F9 - Cinza claro para fundos
+      const corTexto = [15, 23, 42] as const // #0F172A - Quase preto para texto principal
+      const corTextoSecundario = [71, 85, 105] as const // #475569 - Cinza para texto secundário
+      const corDestaque = [61, 0, 255] as const // #3D00FF - Mesma cor do logo para destaques
+      const corBranco = [255, 255, 255] as const // #FFFFFF - Branco
 
       // Definição de margens
       const margemEsquerda = 20
@@ -210,11 +208,23 @@ export const RncForm = () => {
       // Função para calcular altura de texto multi-linha
       const calcularAlturaTexto = (linhas: string[], alturaLinha: number): number => {
         return linhas.length * alturaLinha
-      }      // Função para adicionar cabeçalho corporativo em cada página
-      const addHeader = (pageNumber: number, totalPages: number = 1) => {
-        // Fundo do cabeçalho
+      }
+      
+      // Flag para indicar se estamos no modo de cálculo do total de páginas
+      let isCalculatingMode = false;
+        // Função para adicionar cabeçalho corporativo em cada página
+      const addHeader = (pageNumber: number, totalPages: number = 0) => {        // Fundo do cabeçalho
         pdf.setFillColor(...corTerciaria)
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 40, "F")
+        
+        // Se estivermos no modo de cálculo, mostrar apenas o essencial no cabeçalho
+        if (isCalculatingMode) {
+          // Somente adicionar linhas e espaços para o layout básico no modo de cálculo
+          pdf.setDrawColor(...corPrimaria)
+          pdf.setFillColor(...corPrimaria)
+          pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 5, "F")
+          return;
+        }
 
         // Linha decorativa superior
         pdf.setDrawColor(...corPrimaria)
@@ -252,14 +262,13 @@ export const RncForm = () => {
         const centroX = pdf.internal.pageSize.getWidth() / 2 - tituloWidth / 2
 
         // Posiciona o título centralizado
-        pdf.text(titulo, centroX, 18)
-
-        // Data abaixo do título, alinhada à esquerda
+        pdf.text(titulo, centroX, 18)        // Data posicionada abaixo do título e logo, para evitar conflito visual
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(10)
         pdf.setTextColor(...corTextoSecundario)
         const dataFormatada = new Date().toLocaleDateString("pt-BR")
-        pdf.text(`Data: ${dataFormatada}`, margemEsquerda, 30)
+        // Movida para baixo para dar mais espaçamento
+        pdf.text(`Data: ${dataFormatada}`, margemEsquerda + 45, 35)
 
         // ID do documento à direita, sem sobrepor o título
         pdf.setFont("helvetica", "bold")
@@ -267,13 +276,16 @@ export const RncForm = () => {
         pdf.setTextColor(...corDestaque)
         const idText = `ID: ${documentId}`
         const idWidth = (pdf.getStringUnitWidth(idText) * 11) / pdf.internal.scaleFactor
-        pdf.text(idText, pdf.internal.pageSize.getWidth() - margemDireita - idWidth, 30)
-
-        // Número da página à direita
+        pdf.text(idText, pdf.internal.pageSize.getWidth() - margemDireita - idWidth, 30)        // Número da página à direita com informação total de páginas
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(10)
         pdf.setTextColor(...corTextoSecundario)
+        
+        // Sempre mostra "Página X de Y" com o número correto
         const pageText = `Página ${pageNumber} de ${totalPages}`
+        console.log(`Renderizando numeração: ${pageText}`);
+        
+        // Posiciona o texto alinhado à direita
         const pageWidth = (pdf.getStringUnitWidth(pageText) * 10) / pdf.internal.scaleFactor
         pdf.text(pageText, pdf.internal.pageSize.getWidth() - margemDireita - pageWidth, 35)
 
@@ -374,35 +386,40 @@ export const RncForm = () => {
       }
 
       // Função para adicionar checkbox estilizado
-      const addStyledCheckbox = (x: number, y: number, checked: boolean, label: string): number => {
-        // Desenha o checkbox
-        pdf.setDrawColor(...corSecundaria)
-        pdf.setLineWidth(0.2)
+      const addStyledCheckbox = (x: number, y: number, checked: boolean, label: string, size: number = 3): number => {
+        // Desenha o checkbox usando a função comum
+        drawCheckbox(x, y - size, size, checked)
 
-        if (checked) {
-          // Checkbox marcado
-          pdf.setFillColor(...corDestaque)
-          pdf.rect(x, y - 3, 3, 3, "F")
-
-          // Marca de verificação
-          pdf.setDrawColor(...corBranco)
-          pdf.setLineWidth(0.2)
-          pdf.line(x + 0.5, y - 1, x + 1, y - 0.5)
-          pdf.line(x + 1, y - 0.5, x + 2.5, y - 2)
-        } else {
-          // Checkbox vazio
-          pdf.setFillColor(...corBranco)
-          pdf.rect(x, y - 3, 3, 3, "S")
-        }
-
-        // Label
+        // Label (ajustado o espaçamento baseado no tamanho)
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(8)
         pdf.setTextColor(...corTexto)
-        pdf.text(label, x + 5, y)
+        pdf.text(label, x + size + 2, y)
 
         const labelWidth = (pdf.getStringUnitWidth(label) * 8) / pdf.internal.scaleFactor + 7
         return labelWidth
+      }
+
+      // Nova função para desenhar checkbox de forma consistente
+      const drawCheckbox = (x: number, y: number, size: number, checked: boolean) => {
+        if (checked) {
+          // Checkbox marcado
+          pdf.setFillColor(...corDestaque)
+          pdf.rect(x, y, size, size, "F")
+          
+          // Marca de verificação (ajustada para o tamanho)
+          pdf.setDrawColor(...corBranco)
+          pdf.setLineWidth(0.2)
+          const checkScale = size / 4
+          pdf.line(x + 0.8 * checkScale, y + 1.5 * checkScale, x + 1.5 * checkScale, y + 2.5 * checkScale)
+          pdf.line(x + 1.5 * checkScale, y + 2.5 * checkScale, x + 3.2 * checkScale, y + 0.5 * checkScale)
+        } else {
+          // Checkbox vazio
+          pdf.setDrawColor(...corPrimaria)
+          pdf.setLineWidth(0.1)
+          pdf.setFillColor(...corBranco)
+          pdf.rect(x, y, size, size, "S")
+        }
       }
 
       // Função para adicionar imagem com alta qualidade
@@ -411,19 +428,14 @@ export const RncForm = () => {
         x: number,
         y: number,
         width: number,
-        height: number,
-      ): Promise<boolean> => {
+        height: number,      ): Promise<boolean> => {
         if (!imgSrc) return false
 
         try {
-          const img = await loadImageFromBase64(imgSrc)
-
-          // Determina o formato da imagem
-          let format = "JPEG"
+          const img = await loadImageFromBase64(imgSrc)          // Determina o formato da imagem
+          let format: "JPEG" | "PNG" = "JPEG"
           if (imgSrc.startsWith("data:image/png")) {
             format = "PNG"
-          } else if (imgSrc.startsWith("data:image/gif")) {
-            format = "GIF"
           }
 
           // Adiciona a imagem
@@ -448,12 +460,18 @@ export const RncForm = () => {
         } catch (error) {
           console.warn("Erro ao adicionar imagem ao PDF:", error)
           return false
-        }
-      }      // Adiciona o cabeçalho na primeira página
-      addHeader(1, 1)  // Temporariamente passa 1 como número total de páginas
-
-      // Posição inicial após o cabeçalho
+        }      }
+      
+      // Criar um documento temporário para calcular o número de páginas
+      // Ativamos o modo de cálculo para minimizar a renderização durante essa fase
+      isCalculatingMode = true;
+      
+      // Posição inicial após o cabeçalho (simplificado durante o cálculo)
       let yPos = margemSuperior + 30
+      
+      // Adiciona cabeçalho simplificado para primeira página durante cálculo
+      // Sem número total de páginas ainda
+      addHeader(1, 0)
 
       // Adiciona informações gerais do documento - VERSÃO MAIS COMPACTA
       yPos = addSectionTitle("INFORMAÇÕES GERAIS", yPos)
@@ -486,18 +504,9 @@ export const RncForm = () => {
 
       let currentX = margemEsquerda + 45
       statusOptions.forEach((option) => {
-        // Checkbox com estilo compacto
-        if (formData.statusAtividade === option.value) {
-          // Checkbox marcado
-          pdf.setFillColor(...corDestaque)
-          pdf.rect(currentX, yPos + 2, 3, 3, "F")
-        } else {
-          // Checkbox vazio
-          pdf.setDrawColor(...corPrimaria)
-          pdf.setLineWidth(0.1)
-          pdf.setFillColor(...corBranco)
-          pdf.rect(currentX, yPos + 2, 3, 3, "S")
-        }
+        // Checkbox com estilo compacto usando a função comum
+        const checkSize = 4;
+        drawCheckbox(currentX, yPos + 2, checkSize, formData.statusAtividade === option.value)
 
         // Label
         pdf.setFont("helvetica", "normal")
@@ -582,13 +591,11 @@ export const RncForm = () => {
           }
         }
       });
-      
-      yPos += 65; // Classificação com estilo melhorado
+        yPos += 65; // Classificação com estilo melhorado
       yPos = addSectionTitle("CLASSIFICAÇÃO", yPos)
       yPos += 5
-      
-      // Aumentar a altura da área de classificação para melhor organizar os itens
-      const alturaClassificacao = 80; // Aumentado para acomodar melhor as opções
+        // Altura da área de classificação para melhor organizar os itens
+      const alturaClassificacao = 110; // Ajustado para uso mais eficiente do espaço em relação ao "Grau"
       
       // Desenha um retângulo de fundo para toda a área de classificação
       pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave
@@ -598,17 +605,7 @@ export const RncForm = () => {
       pdf.setDrawColor(...corSecundaria)
       pdf.setLineWidth(0.1)
       pdf.rect(margemEsquerda, yPos, larguraUtil, alturaClassificacao, "S")
-
-      // Divide a área de classificação em duas seções principais
-      const halfWidth = larguraUtil / 2;
-      
-      // Seção esquerda para TIPO e NATUREZA
-      // Adiciona um retângulo divisório sutil para separar as seções
-      pdf.setDrawColor(...corSecundaria)
-      pdf.setLineWidth(0.1)
-      pdf.line(margemEsquerda + halfWidth, yPos, margemEsquerda + halfWidth, yPos + alturaClassificacao)
-      
-      // ------ SEÇÃO TIPO ------
+        // ------ SEÇÃO TIPO ------
       
       // Cabeçalho da seção TIPO
       pdf.setFont("helvetica", "bold")
@@ -621,28 +618,11 @@ export const RncForm = () => {
         { label: "SES", value: "ses" },
       ]
         // Posicionamento dos checkboxes do TIPO
-      let currentXTipo = margemEsquerda + 30;
-      tipoOptions.forEach((option) => {
+      let currentXTipo = margemEsquerda + 30;        tipoOptions.forEach((option) => {
         const checkSize = 4;
         
-        // Checkbox
-        if (formData.tipo.includes(option.value)) {
-          // Checkbox marcado
-          pdf.setFillColor(...corDestaque)
-          pdf.rect(currentXTipo, yPos + 7, checkSize, checkSize, "F")
-          
-          // Marca de verificação
-          pdf.setDrawColor(...corBranco)
-          pdf.setLineWidth(0.2)
-          pdf.line(currentXTipo + 0.8, yPos + 8.5, currentXTipo + 1.5, yPos + 9.5)
-          pdf.line(currentXTipo + 1.5, yPos + 9.5, currentXTipo + 3.2, yPos + 7.5)
-        } else {
-          // Checkbox vazio
-          pdf.setDrawColor(...corPrimaria)
-          pdf.setLineWidth(0.1)
-          pdf.setFillColor(...corBranco)
-          pdf.rect(currentXTipo, yPos + 7, checkSize, checkSize, "S")
-        }
+        // Checkbox - usando a função comum
+        drawCheckbox(currentXTipo, yPos + 7, checkSize, formData.tipo.includes(option.value))
         
         // Label
         pdf.setFont("helvetica", "normal")
@@ -650,10 +630,9 @@ export const RncForm = () => {
         pdf.setTextColor(...corTexto)
         pdf.text(option.label, currentXTipo + 6, yPos + 10)
         
-        currentXTipo += 40; // Espaçamento adequado
+        currentXTipo += 80; // Espaçamento aumentado para distribuir melhor na largura total
       })
-      
-      // ------ SEÇÃO NATUREZA ------
+        // ------ SEÇÃO NATUREZA ------
       
       // Cabeçalho da seção NATUREZA
       pdf.setFont("helvetica", "bold")
@@ -671,11 +650,11 @@ export const RncForm = () => {
         { label: "M. AMBIENTE", value: "mAmbiente" },
         { label: "ORGANIZ/COMPORTAMENTO", value: "organizComportamento" },
       ]
-      // Layout em grade organizada para Natureza
+      // Layout em grade organizada para Natureza usando largura total
       // Dividir em 4 colunas x 2 linhas
       const naturezaColCount = 4;
       const naturezaRowCount = 2;
-      const naturezaColWidth = (halfWidth - 40) / naturezaColCount;
+      const naturezaColWidth = (larguraUtil - 50) / naturezaColCount;
       const naturezaRowHeight = 12;
       const naturezaStartX = margemEsquerda + 30;
       const naturezaStartY = yPos + 25;
@@ -690,23 +669,8 @@ export const RncForm = () => {
             
             // Checkbox com tamanho consistente
             const checkSize = 4;
-            if (formData.natureza.includes(option.value)) {
-              // Checkbox marcado
-              pdf.setFillColor(...corDestaque)
-              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "F")
-              
-              // Marca de verificação
-              pdf.setDrawColor(...corBranco)
-              pdf.setLineWidth(0.2)
-              pdf.line(optionX + 0.8, optionY - 1.5, optionX + 1.5, optionY - 0.5)
-              pdf.line(optionX + 1.5, optionY - 0.5, optionX + 3.2, optionY - 2.5)
-            } else {
-              // Checkbox vazio
-              pdf.setDrawColor(...corPrimaria)
-              pdf.setLineWidth(0.1)
-              pdf.setFillColor(...corBranco)
-              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "S")
-            }
+            // Checkbox - usando a função comum
+            drawCheckbox(optionX, optionY - 3, checkSize, formData.natureza.includes(option.value))
             
             // Label
             pdf.setFont("helvetica", "normal")
@@ -716,14 +680,13 @@ export const RncForm = () => {
           }
         }
       }
-      
-      // ------ SEÇÃO OBRA ------
+        // ------ SEÇÃO OBRA ------
       
       // Cabeçalho da seção OBRA
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(9)
       pdf.setTextColor(...corPrimaria)
-      pdf.text("Obra:", margemEsquerda + halfWidth + 5, yPos + 10)
+      pdf.text("Obra:", margemEsquerda + 5, yPos + 50)
       
       const obraOptions = [
         { label: "RCE", value: "rce" },
@@ -741,13 +704,13 @@ export const RncForm = () => {
         { label: "PAVIMENTAÇÃO", value: "pavimentacao" },
       ]
       
-      // Disposição em grade para obra - 4 colunas por 4 linhas
-      const obraColCount = 4;
-      const obraRowCount = 4;
-      const obraColWidth = (halfWidth - 20) / obraColCount;
+      // Disposição em grade para obra usando largura total - 4 colunas por 4 linhas
+      const obraColCount = 5;
+      const obraRowCount = 3;
+      const obraColWidth = (larguraUtil - 40) / obraColCount;
       const obraRowHeight = 10;
-      const obraStartX = margemEsquerda + halfWidth + 25;
-      const obraStartY = yPos + 10;
+      const obraStartX = margemEsquerda + 30;
+      const obraStartY = yPos + 50;
       
       for (let row = 0; row < obraRowCount; row++) {
         for (let col = 0; col < obraColCount; col++) {
@@ -758,24 +721,9 @@ export const RncForm = () => {
             const optionY = obraStartY + (row * obraRowHeight);
             
             // Checkbox
-            const checkSize = 3;
-            if (formData.obra.includes(option.value)) {
-              // Checkbox marcado
-              pdf.setFillColor(...corDestaque)
-              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "F")
-              
-              // Marca de verificação
-              pdf.setDrawColor(...corBranco)
-              pdf.setLineWidth(0.2)
-              pdf.line(optionX + 0.6, optionY - 1.5, optionX + 1, optionY - 1)
-              pdf.line(optionX + 1, optionY - 1, optionX + 2.2, optionY - 2)
-            } else {
-              // Checkbox vazio
-              pdf.setDrawColor(...corPrimaria)
-              pdf.setLineWidth(0.1)
-              pdf.setFillColor(...corBranco)
-              pdf.rect(optionX, optionY - 3, checkSize, checkSize, "S")
-            }
+            const checkSize = 4;
+            // Checkbox - usando a função comum
+            drawCheckbox(optionX, optionY - 3, checkSize, formData.obra.includes(option.value))
             
             // Label
             pdf.setFont("helvetica", "normal")
@@ -785,14 +733,13 @@ export const RncForm = () => {
           }
         }
       }
-      
-      // ------ SEÇÃO GRAU ------
+        // ------ SEÇÃO GRAU ------
       
       // Cabeçalho da seção GRAU
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(9)
       pdf.setTextColor(...corPrimaria)
-      pdf.text("Grau:", margemEsquerda + 5, yPos + 45)
+      pdf.text("Grau:", margemEsquerda + 5, yPos + 85)
       
       const grauOptions = [
         { label: "LEVE", value: "leve" },
@@ -800,82 +747,100 @@ export const RncForm = () => {
         { label: "GRAVE", value: "grave" },
         { label: "GRAVÍSSIMA", value: "gravissima" },
       ]
-      
-      // Layout horizontal para opções de grau
+        // Layout horizontal para opções de grau usando largura total
       let grauX = margemEsquerda + 30;
       grauOptions.forEach((option) => {
         const checkSize = 4;
         
-        // Checkbox
-        if (formData.grau === option.value) {
-          // Checkbox marcado
-          pdf.setFillColor(...corDestaque)
-          pdf.rect(grauX, yPos + 42, checkSize, checkSize, "F")
-          
-          // Marca de verificação
-          pdf.setDrawColor(...corBranco)
-          pdf.setLineWidth(0.2)
-          pdf.line(grauX + 0.8, yPos + 43.5, grauX + 1.5, yPos + 44.5)
-          pdf.line(grauX + 1.5, yPos + 44.5, grauX + 3.2, yPos + 42.5)
-        } else {
-          // Checkbox vazio
-          pdf.setDrawColor(...corPrimaria)
-          pdf.setLineWidth(0.1)
-          pdf.setFillColor(...corBranco)
-          pdf.rect(grauX, yPos + 42, checkSize, checkSize, "S")
-        }
-        
-        // Label
+        // Checkbox - usando a função comum
+        drawCheckbox(grauX, yPos + 82, checkSize, formData.grau === option.value)
+          // Label
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(8)
         pdf.setTextColor(...corTexto)
-        pdf.text(option.label, grauX + 6, yPos + 45)
-        
-        grauX += 40; // Espaçamento adequado
+        pdf.text(option.label, grauX + 6, yPos + 85)
+        grauX += 20; // Espaçamento aumentado para distribuir melhor na largura total
       })
 
-      yPos += 35
-
-      // Problema Identificado
+      yPos += 95 // Ajustar posição para a próxima seção considerando a altura da classificação      // Problema Identificado
       yPos = addSectionTitle("PROBLEMA IDENTIFICADO", yPos)
       yPos += 5
 
       const problemaLinhas = quebrarTexto(formData.problema || "", larguraUtil, 9)
-
-      // Verifica se o problema é muito grande e precisa de uma nova página
+      const alturaLinhaProblema = 4
+      
+      // Se o problema é muito grande e precisa de nova página
       if (problemaLinhas.length > 15) {
         // Verifica se há espaço suficiente
-        if (yPos + 15 * 4 > pdf.internal.pageSize.getHeight() - margemInferior - 20) {
+        if (yPos + 15 * alturaLinhaProblema > pdf.internal.pageSize.getHeight() - margemInferior - 20) {
+          // Altura para as linhas que cabem nesta página
+          const alturaProblemaAtual = 15 * alturaLinhaProblema + 6 // 6px de padding vertical
+          
+          // Desenha o fundo do texto do problema identificado nesta página
+          pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave, igual às outras seções
+          pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblemaAtual, "F")
+          
           pdf.addPage()
           addHeader(pdf.getNumberOfPages())
-          yPos = margemSuperior + 30
+          yPos = margemSuperior + 30        } else {
+          // Altura para as primeiras 15 linhas
+          const alturaProblemaAtual = 15 * alturaLinhaProblema + 6 // 6px de padding vertical
+          
+          // Desenha o fundo do texto do problema identificado
+          pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave, igual às outras seções
+          pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblemaAtual, "F")
+          
+          // Adiciona uma borda sutil
+          pdf.setDrawColor(...corSecundaria)
+          pdf.setLineWidth(0.1)
+          pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblemaAtual, "S")
         }
 
         // Exibe as primeiras 15 linhas
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(9)
-        pdf.setTextColor(...corTexto)
-        pdf.text(problemaLinhas.slice(0, 15), margemEsquerda, yPos)
-        yPos += 15 * 4 + 5
-
-        // Adiciona nova página para o restante do texto
+        pdf.setTextColor(...corTexto) // Texto escuro em vez de branco
+        pdf.text(problemaLinhas.slice(0, 15), margemEsquerda + 2, yPos + 3)
+        yPos += 15 * alturaLinhaProblema + 5        // Adiciona nova página para o restante do texto
         pdf.addPage()
         addHeader(pdf.getNumberOfPages())
         yPos = margemSuperior + 30
-
-        // Continua o texto na nova página
+        
+        // Calcula a altura correta para o texto restante
+        const linhasRestantes = problemaLinhas.slice(15)
+        const alturaProblemaRestante = linhasRestantes.length * alturaLinhaProblema + 6
+          // Desenha o fundo do texto do problema identificado na nova página
+        pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave, igual às outras seções
+        pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblemaRestante, "F")
+        
+        // Adiciona uma borda sutil
+        pdf.setDrawColor(...corSecundaria)
+        pdf.setLineWidth(0.1)
+        pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblemaRestante, "S")
+        
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(9)
-        pdf.setTextColor(...corTexto)
-        pdf.text(problemaLinhas.slice(15), margemEsquerda, yPos)
-        yPos += (problemaLinhas.length - 15) * 4 + 10
-      } else {
+        pdf.setTextColor(...corTexto) // Texto escuro em vez de branco
+        pdf.text(linhasRestantes, margemEsquerda + 2, yPos + 3)
+        yPos += linhasRestantes.length * alturaLinhaProblema + 10      } else {
+        // Calcula a altura correta para o texto completo
+        const alturaProblema = problemaLinhas.length * alturaLinhaProblema + 6 // 6px de padding vertical
+        
+        // Desenha o fundo do texto do problema identificado
+        pdf.setFillColor(248, 250, 252) // Cor de fundo muito suave, igual às outras seções
+        pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblema, "F")
+        
+        // Adiciona uma borda sutil
+        pdf.setDrawColor(...corSecundaria)
+        pdf.setLineWidth(0.1)
+        pdf.rect(margemEsquerda, yPos - 2, larguraUtil, alturaProblema, "S")
+        
         // Exibe todo o texto
         pdf.setFont("helvetica", "normal")
         pdf.setFontSize(9)
-        pdf.setTextColor(...corTexto)
-        pdf.text(problemaLinhas, margemEsquerda, yPos)
-        yPos += problemaLinhas.length * 4 + 10
+        pdf.setTextColor(...corTexto) // Texto escuro em vez de branco
+        pdf.text(problemaLinhas, margemEsquerda + 2, yPos + 3)
+        yPos += problemaLinhas.length * alturaLinhaProblema + 10
       }
 
       // Evidências (Imagens)
@@ -985,7 +950,7 @@ export const RncForm = () => {
         for (let i = 0; i < 2; i++) {
           if (i < acaoOptions.length) {
             const option = acaoOptions[i]
-            const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label)
+            const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label, 4)
             currentX += width + 10
           }
         }
@@ -997,14 +962,14 @@ export const RncForm = () => {
         for (let i = 2; i < 4; i++) {
           if (i < acaoOptions.length) {
             const option = acaoOptions[i]
-            const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label)
+            const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label, 4)
             currentX += width + 10
           }
         }
       } else {
         // Em paisagem, pode colocar tudo em uma linha
         acaoOptions.forEach((option) => {
-          const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label)
+          const width = addStyledCheckbox(currentX, yPos, formData.acaoCorretiva === option.value, option.label, 4)
           currentX += width + 10
         })
       }
@@ -1081,26 +1046,27 @@ export const RncForm = () => {
         )
 
         yPos += rowHeight
-      })
-
-      // Borda externa da tabela
+      })      // Borda externa da tabela
       pdf.setDrawColor(...corSecundaria)
       pdf.setLineWidth(0.2)
-      pdf.rect(margemEsquerda, yPos - 8 * formData.acoes.length, larguraUtil, 8 * formData.acoes.length, "S")
+      pdf.rect(margemEsquerda, yPos - 8 * formData.acoes.length, larguraUtil, 8 * formData.acoes.length, "S");
+      
+      yPos += 5
 
-      yPos += 15
-
-      // Assinaturas
-      yPos = adicionarNovaPaginaSeNecessario(120, yPos)
-      yPos = addSectionTitle("ASSINATURAS", yPos)
+      // Assinaturas - tentamos manter na mesma página que a tabela de ações
+      // Reduzimos a altura necessária para as assinaturas para 50 unidades em vez de 120
+      // para evitar quebra de página desnecessária
+      yPos = adicionarNovaPaginaSeNecessario(0, yPos)
+      yPos = addSectionTitle("DATAS", yPos)
       yPos += 10
 
       // Cria duas colunas para as assinaturas
-      const signatureColWidth = larguraUtil / 2 - 5
-
+      const signatureColWidth = larguraUtil / 2 - 5      // Versão mais compacta para as assinaturas
+      const signatureHeight = 30; // Reduzido de 100 para 60
+      
       // Coluna de Abertura
       pdf.setFillColor(...corTerciaria)
-      pdf.rect(margemEsquerda, yPos, signatureColWidth, 100, "F")
+      pdf.rect(margemEsquerda, yPos, signatureColWidth, signatureHeight, "F")
 
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(10)
@@ -1113,49 +1079,9 @@ export const RncForm = () => {
       pdf.setTextColor(...corTexto)
       pdf.text(`Data: ${formData.dataAbertura || "___/___/______"}`, margemEsquerda + 10, yPos + 20)
 
-      // Assinatura contratante
-      pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
-      pdf.text("Contratante:", margemEsquerda + 10, yPos + 30)
-
-      if (formData.assinatura_contratanteAbertura) {
-        await addHighQualityImage(
-          formData.assinatura_contratanteAbertura,
-          margemEsquerda + 10,
-          yPos + 35,
-          signatureColWidth - 20,
-          20,
-        )
-      } else {
-        // Linha para assinatura
-        pdf.setDrawColor(...corSecundaria)
-        pdf.setLineWidth(0.1)
-        pdf.line(margemEsquerda + 10, yPos + 45, margemEsquerda + signatureColWidth - 10, yPos + 45)
-      }
-
-      // Assinatura contratada
-      pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
-      pdf.text("Contratada:", margemEsquerda + 10, yPos + 65)
-
-      if (formData.assinatura_contratadaAbertura) {
-        await addHighQualityImage(
-          formData.assinatura_contratadaAbertura,
-          margemEsquerda + 10,
-          yPos + 70,
-          signatureColWidth - 20,
-          20,
-        )
-      } else {
-        // Linha para assinatura
-        pdf.setDrawColor(...corSecundaria)
-        pdf.setLineWidth(0.1)
-        pdf.line(margemEsquerda + 10, yPos + 80, margemEsquerda + signatureColWidth - 10, yPos + 80)
-      }
-
       // Coluna de Fechamento
       pdf.setFillColor(...corTerciaria)
-      pdf.rect(margemEsquerda + signatureColWidth + 10, yPos, signatureColWidth, 100, "F")
+      pdf.rect(margemEsquerda + signatureColWidth + 10, yPos, signatureColWidth, signatureHeight, "F")
 
       pdf.setFont("helvetica", "bold")
       pdf.setFontSize(10)
@@ -1171,60 +1097,29 @@ export const RncForm = () => {
         margemEsquerda + signatureColWidth + 20,
         yPos + 20,
       )
-
-      // Assinatura contratante
-      pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
-      pdf.text("Contratante:", margemEsquerda + signatureColWidth + 20, yPos + 30)
-
-      if (formData.assinatura_contratanteFechamento) {
-        await addHighQualityImage(
-          formData.assinatura_contratanteFechamento,
-          margemEsquerda + signatureColWidth + 20,
-          yPos + 35,
-          signatureColWidth - 20,
-          20,
-        )
-      } else {
-        // Linha para assinatura
-        pdf.setDrawColor(...corSecundaria)
-        pdf.setLineWidth(0.1)
-        pdf.line(
-          margemEsquerda + signatureColWidth + 20,
-          yPos + 45,
-          margemEsquerda + signatureColWidth * 2 + 10 - 10,
-          yPos + 45,
-        )
-      }
-
-      // Assinatura contratada
-      pdf.setFont("helvetica", "bold")
-      pdf.setFontSize(8)
-      pdf.text("Contratada:", margemEsquerda + signatureColWidth + 20, yPos + 65)
-
-      if (formData.assinatura_contratadaFechamento) {
-        await addHighQualityImage(
-          formData.assinatura_contratadaFechamento,
-          margemEsquerda + signatureColWidth + 20,
-          yPos + 70,
-          signatureColWidth - 20,
-          20,
-        )
-      } else {
-        // Linha para assinatura
-        pdf.setDrawColor(...corSecundaria)
-        pdf.setLineWidth(0.1)
-        pdf.line(
-          margemEsquerda + signatureColWidth + 20,
-          yPos + 80,
-          margemEsquerda + signatureColWidth * 2 + 10 - 10,
-          yPos + 80,
-        )
-      }      // Adiciona rodapé em todas as páginas
-      const totalPages = pdf.getNumberOfPages()
+      
+      // Agora que concluímos todo o documento, sabemos o número total de páginas
+      const totalPages = pdf.getNumberOfPages();
+      
+      console.log(`Documento gerado com ${totalPages} páginas. Aplicando cabeçalhos e rodapés finais.`);
+      
+      // Desativa o modo de cálculo para exibir os cabeçalhos e rodapés completos
+      isCalculatingMode = false;
+      
+      // Regeneramos todos os cabeçalhos e rodapés com o número correto de páginas
       for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i)
-        addFooter(i, totalPages)
+        // Muda para a página atual
+        pdf.setPage(i);
+        
+        // Limpa o cabeçalho anterior (simplificado)
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 40, 'F');
+        
+        // Adiciona o cabeçalho completo com a numeração correta
+        addHeader(i, totalPages);
+        
+        // Adiciona o rodapé com a numeração correta
+        addFooter(i, totalPages);
       }
 
       // Salva o PDF

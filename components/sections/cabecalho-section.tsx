@@ -1,13 +1,22 @@
 "use client"
 
 import Image from "next/image"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 
 export const CabecalhoSection = () => {
   const isMobile = useMobile()
-
+  const [documentId, setDocumentId] = useState<string>("----")
+  const [formattedDate, setFormattedDate] = useState<string>("--/--/----")
+  
+  // Generate date and ID on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setFormattedDate(new Date().toLocaleDateString("pt-BR"))
+    setDocumentId(Math.floor(Math.random() * 10000).toString().padStart(4, "0"))
+  }, [])
+  
   return (
     <Card className="border-2 border-blue-900">
       <CardContent className={cn("p-4 flex flex-col md:flex-row justify-between items-center", isMobile && "p-1.5")}>
@@ -16,10 +25,7 @@ export const CabecalhoSection = () => {
             REGISTRO DE NÃO CONFORMIDADE | RNC
           </p>
           <p className={cn("text-blue-600 text-lg font-bold", isMobile && "text-xs text-center")}>
-            N°: {new Date().toLocaleDateString("pt-BR")} | A+
-            {Math.floor(Math.random() * 10000)
-              .toString()
-              .padStart(4, "0")}
+            N°: {formattedDate} | A+{documentId}
           </p>
         </div>
         <div className={cn("mt-4 md:mt-0", isMobile && "mt-1")}>

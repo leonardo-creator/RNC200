@@ -93,9 +93,8 @@ export const AcoesSection = ({ updateFormData, formData, readOnly = false }: Aco
                 </TableHead>
                 <TableHead className={cn("w-[20%] text-brk-blue font-bold", isMobile && "text-xs")}>Prazo</TableHead>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {acoes.map((acao, index) => (
+            </TableHeader>            <TableBody>
+              {acoes.map((acao: { acao: string; responsavel: string; prazo: string }, index: number) => (
                 <TableRow key={index}>
                   <TableCell className={cn("p-2", isMobile && "p-1")}>
                     <Input

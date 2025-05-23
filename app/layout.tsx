@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Registro de Não Conformidade | RNC",
   description: "Formulário de Registro de Não Conformidade para BRK Saneatins",
-  generator: "v0.dev",
+  generator: "Leonardo Juvencio",
 }
 
 export default function RootLayout({
